@@ -13,6 +13,9 @@ package body Generic_ECS_Suite is
    Test_Entity_Component : aliased Runner.Test_Case;
    Test_Selection        : aliased Runner.Test_Case;
    Test_System_Type      : aliased Runner.Test_Case;
+   Test_Add_Resource     : aliased Runner.Test_Case;
+   Test_Get_Resource     : aliased Runner.Test_Case;
+   Test_Remove_Resource  : aliased Runner.Test_Case;
 
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
    begin
@@ -45,6 +48,24 @@ package body Generic_ECS_Suite is
          Name => "Test system interface type",
          Test => Generic_ECS_Tests.Test_System_Type'Access);
       Result.Add_Test (Test_System_Type'Access);
+
+      Runner.Create
+        (TC   => Test_Add_Resource,
+         Name => "Add a resource",
+         Test => Generic_ECS_Tests.Test_Add_Resource'Access);
+      Result.Add_Test (Test_Add_Resource'Access);
+
+      Runner.Create
+        (TC   => Test_Remove_Resource,
+         Name => "Remove a resource",
+         Test => Generic_ECS_Tests.Test_Remove_Resource'Access);
+      Result.Add_Test (Test_Remove_Resource'Access);
+
+      Runner.Create
+        (TC   => Test_Get_Resource,
+         Name => "Get a resource",
+         Test => Generic_ECS_Tests.Test_Get_Resource'Access);
+      Result.Add_Test (Test_Get_Resource'Access);
 
       return Result'Access;
    end Suite;

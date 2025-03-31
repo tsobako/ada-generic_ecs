@@ -9,6 +9,7 @@ package body Internal.Generic_Registry is
       return Registry : Registry_Type do
          Registry.Last_Entity := Entity_Type'First;
          Registry.Entities    := Entity_Component_Hashed_Maps.Empty_Map;
+         Registry.Resources   := Resource_Hashed_Maps.Empty_Map;
       end return;
    end Initialize;
 
@@ -264,6 +265,47 @@ package body Internal.Generic_Registry is
       end loop;
    end Each;
 
+      -------------------------
+   -- Resource management --
+   -------------------------
+
+   -- Assign the resource to the registry
+   procedure Add_Resource
+     (Registry  : in out Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type;
+      Resource      :        Resource_Package.Resource_Interface_Class_Access_Type) is
+   begin
+      Resource_Hashed_Maps.Include (Registry.Resources, Resourse_Type, Resource);
+   end Add_Resource;
+
+
+   -- Return an access to the resource specified by kind
+   function Get_Resource
+     (Registry  : Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type)
+      return Resource_Package.Resource_Interface_Class_Access_Type is begin
+      return Resource_Hashed_Maps.Element (Registry.Resources, Resourse_Type);
+   end;
+
+   
+   -- Return whether or not the registry has the resource
+   function Has_Resource
+     (Registry : Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type)
+      return Boolean is begin
+      return Resource_Hashed_Maps.Contains (Registry.Resources, Resourse_Type);
+   end Has_Resource;
+
+   -- Remove the resource
+   -- Do nothing if the resource was already removed or doesn't exist
+   procedure Remove_Resource
+     (Registry : in out Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type) is begin
+
+      Resource_Hashed_Maps.Exclude (Registry.Resources, Resourse_Type);
+   end Remove_Resource;
+
+
    -------------
    -- Private --
    -------------
@@ -275,5 +317,13 @@ package body Internal.Generic_Registry is
    begin
       return Ada.Containers.Hash_Type (Entity);
    end Hash_Entity;
+
+   function Hash_Resource_Type
+     (Resource_Kind :  Resource_Package.Resource_Kind_Type)
+      return Ada.Containers.Hash_Type
+   is
+   begin
+      return Ada.Containers.Hash_Type (Resource_Package.Resource_Kind_Type'Pos(Resource_Kind));
+   end Hash_Resource_Type;
 
 end Internal.Generic_Registry;

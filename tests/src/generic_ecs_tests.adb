@@ -3,6 +3,9 @@ with AUnit.Assertions;
 with Components;
 with Components.Position;
 with ECS;
+with Resources;
+with Resources.Level;
+with Resources.Time;
 
 package body Generic_ECS_Tests is
 
@@ -171,5 +174,50 @@ package body Generic_ECS_Tests is
       AUnit.Assertions.Assert (System.Foo = 5, "System.Foo has the wrong value after running the system");
 
    end Test_System_Type;
+
+
+   procedure Test_Add_Resource (T : in out Test) is
+      Registry : ECS.Registry_Type        := ECS.Initialize;
+      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+   begin
+      Level_Resource.Value := 1;
+      Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
+      AUnit.Assertions.Assert (Registry.Has_Resource(Resources.Level_Kind), "registry does not have resource");
+      AUnit.Assertions.Assert (not Registry.Has_Resource(Resources.Time_Kind), "registry has other type resource");
+   end Test_Add_Resource;
+
+   procedure Test_Get_Resource (T : in out Test) is 
+      Registry : ECS.Registry_Type        := ECS.Initialize;
+      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+   begin
+      Level_Resource.Value := 1;
+      Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
+
+      declare
+         use type Resources.Level.Level_Resource_Access_Type;
+         Get_Res: constant Resources.Level.Level_Resource_Access_Type := 
+           Resources.Level.Level_Resource_Access_Type (Registry.Get_Resource (Resources.Level_Kind));
+      begin
+         AUnit.Assertions.Assert (Get_Res /= null, "registry does not have resource");
+         AUnit.Assertions.Assert (Get_Res.Value = 1, "resource does not have right value");
+      end;
+   end Test_Get_Resource;
+
+   procedure Test_Remove_Resource (T : in out Test)  is 
+      Registry : ECS.Registry_Type        := ECS.Initialize;
+      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+      Time_Resource: Resources.Time.Time_Resource_Access_Type := new Resources.Time.Time_Resource_Type;
+   begin
+      Level_Resource.Value := 1;
+      Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
+      AUnit.Assertions.Assert (Registry.Has_Resource(Resources.Level_Kind), "registry does not have resource");
+
+
+      Time_Resource.Value := 100;
+      Registry.Add_Resource(Resources.Time_Kind, ECS.Resource_Interface_Class_Access_Type(Time_Resource));
+      Registry.Remove_Resource(Resources.Level_Kind);
+      AUnit.Assertions.Assert (not Registry.Has_Resource(Resources.Level_Kind), "registry does have resource");
+      AUnit.Assertions.Assert (Registry.Has_Resource(Resources.Time_Kind), "registry does not have non-deleted resource");
+   end Test_Remove_Resource;
 
 end Generic_ECS_Tests;
