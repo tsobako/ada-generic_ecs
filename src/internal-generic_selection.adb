@@ -110,6 +110,19 @@ package body Internal.Generic_Selection is
             end loop;
 
             return True;
+
+         when Exact =>
+            declare 
+               Valid: Boolean := True;
+            begin
+               for Kind in Component_Package.Component_Kind_Type loop
+                  if Selection.Is_Selected (Kind) and then not Components_Array (Kind) then
+                     Valid := False;
+                  end if;
+               end loop;
+               return Valid;
+            end;
+
       end case;
    end "=";
 

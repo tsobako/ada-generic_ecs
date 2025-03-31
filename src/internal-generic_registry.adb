@@ -129,6 +129,8 @@ package body Internal.Generic_Registry is
       case Components.Selection_Kind is
          when Selection_Package.Inclusive =>
             Unset_Components;
+         when Selection_Package.Exact =>
+            Unset_Components;
          when Selection_Package.Exclusive =>
             if Registry.Has (Entity, Components) then
                Unset_Components;

@@ -8,7 +8,9 @@ is
 
    type Selection_Kind_Type is
      (Inclusive,           -- At least one of the component
-      Exclusive);          -- Exactly all the selected components
+      Exclusive, -- Exactly all the selected components
+      Exact  -- All the componentss
+      );          
 
    type Selection_Type is tagged private;
 

@@ -1,16 +1,16 @@
 name = "tests"
 description = "Test suite for Generic-ecs."
-version = "0.2.0-dev"
+version = "0.3.0-dev"
 
 authors = ["louis-etne"]
-maintainers = ["louis-etne"]
+maintainers = ["louis-etne@mail.com"]
 maintainers-logins = ["louis-etne"]
 
 executables = ["test_generic_ecs"]
 
 [[depends-on]]
 aunit = "^24.0.0"
-generic_ecs = "^0.2.0"
+generic_ecs = "^0.3.0"
 
 [[pins]]
 generic_ecs = { path='..' }
