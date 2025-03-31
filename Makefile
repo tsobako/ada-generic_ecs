@@ -12,3 +12,6 @@ pretty:
 	@gnatpp -Pgeneric_ecs.gpr -U ${OPTIONS}
 	@gnatpp -Ptests/tests.gpr -U ${OPTIONS}
 	@gnatpp -Pdemo/demo.gpr -U ${OPTIONS}
+
+tests:
+	alr test

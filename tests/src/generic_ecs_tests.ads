@@ -9,5 +9,8 @@ package Generic_ECS_Tests is
    procedure Test_Entity_Component (T : in out Test);
    procedure Test_Selection (T : in out Test);
    procedure Test_System_Type (T : in out Test);
+   procedure Test_Add_Resource (T : in out Test);
+   procedure Test_Get_Resource (T : in out Test);
+   procedure Test_Remove_Resource (T : in out Test);
 
 end Generic_ECS_Tests;

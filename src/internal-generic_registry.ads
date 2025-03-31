@@ -1,9 +1,11 @@
 with Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Internal.Generic_Resource;
 with Internal.Generic_Selection;
 
 generic
    with package Selection_Package is new Internal.Generic_Selection (<>);
+   with package Resource_Package is new Internal.Generic_Resource (<>);
 package Internal.Generic_Registry with
   Preelaborate
 is
@@ -158,6 +160,35 @@ is
      (Registry : in out Registry_Type;
       System   : in out System_Interface_Type'Class);
 
+   -------------------------
+   -- Resource management --
+   -------------------------
+
+   -- Assign the resource to the registry
+   procedure Add_Resource
+     (Registry  : in out Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type;
+      Resource      :        Resource_Package.Resource_Interface_Class_Access_Type);
+
+   -- Return an access to the resource specified by kind
+   function Get_Resource
+     (Registry  : Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type)
+      return Resource_Package.Resource_Interface_Class_Access_Type;
+
+   -- Return whether or not the registry has the resource
+   function Has_Resource
+     (Registry : Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type)
+      return Boolean;
+
+   -- Remove the resource
+   -- Do nothing if the resource was already removed or doesn't exist
+   procedure Remove_Resource
+     (Registry : in out Registry_Type;
+      Resourse_Type    :        Resource_Package.Resource_Kind_Type);
+
+
 private
 
    -- An entity is just an unique id
@@ -179,9 +210,25 @@ private
       Equivalent_Keys => "=",
       "="             => "=");
 
+   use Resource_Package;
+   
+   -- Return a hash from the resource
+   function Hash_Resource_Type
+     (Resource_Kind : Resource_Package.Resource_Kind_Type)
+      return Ada.Containers.Hash_Type;
+
+   package Resource_Hashed_Maps is new Ada.Containers.Hashed_Maps(
+      Key_Type        => Resource_Package.Resource_Kind_Type,
+      Element_Type    => Resource_Package.Resource_Interface_Class_Access_Type,
+      Hash            => Hash_Resource_Type,
+      Equivalent_Keys => "=",
+      "="             => "="
+   );
+
    type Registry_Type is tagged record
       Last_Entity : Entity_Type;
       Entities    : Entity_Component_Hashed_Maps.Map;
+      Resources   : Resource_Hashed_Maps.Map;
    end record;
 
 end Internal.Generic_Registry;
