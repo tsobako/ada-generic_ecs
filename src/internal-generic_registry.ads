@@ -1,5 +1,6 @@
 with Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Hashed_Sets;
 with Internal.Generic_Resource;
 with Internal.Generic_Selection;
 
@@ -41,8 +42,8 @@ is
      (Registry : in out Registry_Type)
       return Entity_Type;
 
-   -- Destroy the entity
-   -- Do nothing if the entity was already destroyed or doesn't exist
+   -- Mark entity to be destroyed
+   -- Components will still available to read, but entity will be skipped in system iteration
    procedure Destroy
      (Registry : in out Registry_Type;
       Entity   :        Entity_Type);
@@ -52,6 +53,10 @@ is
      (Registry : Registry_Type;
       Entity   : Entity_Type)
       return Boolean;
+
+   -- Remove marked to delete entities
+   procedure Maintain
+      (Registry: in out Registry_Type);
 
    --------------------------
    -- Component management --
@@ -199,6 +204,13 @@ private
      (Entity : Entity_Type)
       return Ada.Containers.Hash_Type;
 
+   package Entity_Hash_Set is new Ada.Containers.Hashed_Sets
+     (Element_Type => Entity_Type,
+      Hash => Hash_Entity, 
+      Equivalent_Elements => "=",
+      "=" => "="
+      );
+
    -- Associate each component kind to an access to Component_Interface'Class
    type Component_Access_Array_Type is
      array (Component_Package.Component_Kind_Type) of Component_Package.Component_Interface_Class_Access_Type;
@@ -226,9 +238,10 @@ private
    );
 
    type Registry_Type is tagged record
-      Last_Entity : Entity_Type;
-      Entities    : Entity_Component_Hashed_Maps.Map;
-      Resources   : Resource_Hashed_Maps.Map;
+      Last_Entity        : Entity_Type;
+      Entities           : Entity_Component_Hashed_Maps.Map;
+      Resources          : Resource_Hashed_Maps.Map;
+      Entities_To_Delete : Entity_Hash_Set.Set;
    end record;
 
 end Internal.Generic_Registry;

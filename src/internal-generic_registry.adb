@@ -10,12 +10,14 @@ package body Internal.Generic_Registry is
          Registry.Last_Entity := Entity_Type'First;
          Registry.Entities    := Entity_Component_Hashed_Maps.Empty_Map;
          Registry.Resources   := Resource_Hashed_Maps.Empty_Map;
+         Registry.Entities_To_Delete := Entity_Hash_Set.Empty_Set;
       end return;
    end Initialize;
 
    procedure Clear (Registry : in out Registry_Type) is
    begin
       Registry.Entities.Clear;
+      Registry.Entities_To_Delete.Clear;
    end Clear;
 
    function Count
@@ -47,7 +49,7 @@ package body Internal.Generic_Registry is
       Entity   :        Entity_Type)
    is
    begin
-      Registry.Entities.Delete (Entity);
+      Registry.Entities_To_Delete.Include(Entity);
    end Destroy;
 
    function Has
@@ -56,8 +58,19 @@ package body Internal.Generic_Registry is
       return Boolean
    is
    begin
-      return Registry.Entities.Contains (Entity);
+      return Registry.Entities.Contains (Entity) and then not Registry.Entities_To_Delete.Contains (Entity);
    end Has;
+
+   -- Remove marked to delete entities
+   procedure Maintain
+      (Registry: in out Registry_Type)
+   is
+   begin
+      for E of Registry.Entities_To_Delete loop
+         Registry.Entities.Delete (E);
+      end loop;
+      Registry.Entities_To_Delete.Clear;
+   end Maintain;
 
    --------------------------
    -- Component management --
