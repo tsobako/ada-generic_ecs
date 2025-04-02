@@ -192,6 +192,30 @@ package body Internal.Generic_Registry is
       return Components;
    end Get_Set_Components;
 
+   function Get_Entities
+     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
+      return Selected_Entites_Vector
+   is
+      Entity : Entity_Type;
+      Result : Selected_Entites_Vector := Selected_Entities.Empty_Vector;
+   begin
+      for Cursor in Registry.Entities.Iterate loop
+         Entity := Entity_Component_Hashed_Maps.Key (Cursor);
+         if Registry.Has (Entity, Components) then
+            Selected_Entities.Append (Result, Entity);
+         end if;
+      end loop;
+      return Result;
+   end Get_Entities;
+
+   function Iterate_Entities
+     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
+      return Selected_Entites_Iterator
+   is
+   begin
+      return Selected_Entities.Iterate (Get_Entities (Registry, Components));
+   end Iterate_Entities;
+
    ------------
    --  System --
    ------------

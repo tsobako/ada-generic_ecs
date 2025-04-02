@@ -1,6 +1,7 @@
 with Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Hashed_Sets;
+with Ada.Containers.Vectors;
 with Internal.Generic_Resource;
 with Internal.Generic_Selection;
 
@@ -32,7 +33,15 @@ is
    -----------------------
    --  Entity management --
    -----------------------
-   type Entity_Type is private;
+
+   --  An entity is just an unique id
+   type Entity_Type is new Positive;
+
+   package Selected_Entities is new Ada.Containers.Vectors
+     (Index_Type => Natural, Element_Type => Entity_Type);
+
+   subtype Selected_Entites_Vector is Selected_Entities.Vector;
+   subtype Selected_Entites_Iterator is Selected_Entities.Vector_Iterator_Interfaces.Forward_Iterator'Class;
 
    --  Create an entity in the register
    --  Return the created entity
@@ -110,6 +119,13 @@ is
       Component : Component_Package.Component_Kind_Type)
       return Component_Package.Component_Interface_Class_Access_Type;
 
+   function Get_Entities
+     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
+      return Selected_Entites_Vector;
+
+   function Iterate_Entities
+     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
+      return Selected_Entites_Iterator;
    -----------------------
    --  System management --
    -----------------------
@@ -172,9 +188,6 @@ is
       Resourse_Type :        Resource_Package.Resource_Kind_Type);
 
 private
-
-   --  An entity is just an unique id
-   type Entity_Type is new Positive;
 
    --  Return a hash from the entity
    function Hash_Entity (Entity : Entity_Type) return Ada.Containers.Hash_Type;
