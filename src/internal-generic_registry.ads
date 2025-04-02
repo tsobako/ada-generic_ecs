@@ -122,10 +122,6 @@ is
    function Get_Entities
      (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
       return Selected_Entites_Vector;
-
-   function Iterate_Entities
-     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
-      return Selected_Entites_Iterator;
    -----------------------
    --  System management --
    -----------------------

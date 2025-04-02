@@ -208,14 +208,6 @@ package body Internal.Generic_Registry is
       return Result;
    end Get_Entities;
 
-   function Iterate_Entities
-     (Registry : Registry_Type; Components : Selection_Package.Selection_Type)
-      return Selected_Entites_Iterator
-   is
-   begin
-      return Selected_Entities.Iterate (Get_Entities (Registry, Components));
-   end Iterate_Entities;
-
    ------------
    --  System --
    ------------
