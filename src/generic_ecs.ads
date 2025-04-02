@@ -8,18 +8,25 @@ generic
    type Resource_Kind_Type is (<>);
 package Generic_ECS is
 
-   package Component is new Internal.Generic_Component (Component_Kind_Type => Component_Kind_Type);
-   package Resource is new Internal.Generic_Resource (Resource_Kind_Type => Resource_Kind_Type);
-   package Selection is new Internal.Generic_Selection (Component_Package => Component);
-   package Registry is new Internal.Generic_Registry (Selection_Package => Selection, Resource_Package => Resource);
+   package Component is new Internal.Generic_Component
+     (Component_Kind_Type => Component_Kind_Type);
+   package Resource is new Internal.Generic_Resource
+     (Resource_Kind_Type => Resource_Kind_Type);
+   package Selection is new Internal.Generic_Selection
+     (Component_Package => Component);
+   package Registry is new Internal.Generic_Registry
+     (Selection_Package => Selection, Resource_Package => Resource);
 
-   -- Useful renames
+   --  Useful renames
    subtype Component_Interface_Type is Component.Component_Interface_Type;
-   subtype Component_Interface_Class_Access_Type is Component.Component_Interface_Class_Access_Type;
-   subtype Component_Boolean_Array_Type is Component.Component_Boolean_Array_Type;
+   subtype Component_Interface_Class_Access_Type is
+     Component.Component_Interface_Class_Access_Type;
+   subtype Component_Boolean_Array_Type is
+     Component.Component_Boolean_Array_Type;
 
    subtype Resource_Interface_Type is Resource.Resource_Interface_Type;
-   subtype Resource_Interface_Class_Access_Type is Resource.Resource_Interface_Class_Access_Type;
+   subtype Resource_Interface_Class_Access_Type is
+     Resource.Resource_Interface_Class_Access_Type;
 
    subtype Registry_Type is Registry.Registry_Type;
    subtype Entity_Type is Registry.Entity_Type;

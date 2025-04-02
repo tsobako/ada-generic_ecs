@@ -1,129 +1,90 @@
 package body Internal.Generic_Selection is
 
-   function Select_None
-     (Selection_Kind : Selection_Kind_Type := Inclusive)
-      return Selection_Type
-   is
+   function Select_None return Selection_Type is
    begin
-      return (Kind => Selection_Kind, Components => (others => False));
+      return (Components => (others => Excluded));
    end Select_None;
 
-   function Select_All
-     (Selection_Kind : Selection_Kind_Type := Inclusive)
-      return Selection_Type
-   is
+   function Select_All return Selection_Type is
    begin
-      return (Kind => Selection_Kind, Components => (others => True));
+      return (Components => (others => Included));
    end Select_All;
 
-   function Selection_Kind
-     (Selection : Selection_Type)
-      return Selection_Kind_Type
-   is
+   function Select_Optional return Selection_Type is
    begin
-      return Selection.Kind;
-   end Selection_Kind;
+      return (Components => (others => Optional));
+   end Select_Optional;
 
-   procedure Selection_Kind
-     (Selection : out Selection_Type;
-      Kind      :     Selection_Kind_Type)
-   is
-   begin
-      Selection.Kind := Kind;
-   end Selection_Kind;
-
-   procedure Select_Component
+   procedure Include_Component
      (Selection : out Selection_Type;
       Component :     Component_Package.Component_Kind_Type)
    is
    begin
-      Selection.Components (Component) := True;
-   end Select_Component;
+      Selection.Components (Component) := Included;
+   end Include_Component;
 
-   procedure Unselect_Component
+   procedure Exclude_Component
      (Selection : out Selection_Type;
       Component :     Component_Package.Component_Kind_Type)
    is
    begin
-      Selection.Components (Component) := False;
-   end Unselect_Component;
+      Selection.Components (Component) := Excluded;
+   end Exclude_Component;
 
-   function Is_Selected
+   procedure Optional_Component
+     (Selection : out Selection_Type;
+      Component :     Component_Package.Component_Kind_Type)
+   is
+   begin
+      Selection.Components (Component) := Optional;
+   end Optional_Component;
+
+   function Is_Included
      (Selection : Selection_Type;
-      Component : Component_Package.Component_Kind_Type)
-      return Boolean
+      Component : Component_Package.Component_Kind_Type) return Boolean
    is
    begin
-      return Selection.Components (Component);
-   end Is_Selected;
+      return Selection.Components (Component) = Included;
+   end Is_Included;
 
-   function "+"
-     (Component : Component_Package.Component_Kind_Type)
-      return Selection_Type
-   is
-      Selection : Selection_Type := Select_None;
-   begin
-      Selection.Select_Component (Component);
-      return Selection;
-   end "+";
-
-   function "+"
-     (LHS, RHS : Component_Package.Component_Kind_Type)
-      return Selection_Type
-   is
-   begin
-      return (+LHS) + RHS;
-   end "+";
-
-   function "+"
+   function Is_Excluded
      (Selection : Selection_Type;
-      Component : Component_Package.Component_Kind_Type)
-      return Selection_Type
+      Component : Component_Package.Component_Kind_Type) return Boolean
    is
-      Result : Selection_Type := Selection;
    begin
-      Result.Select_Component (Component);
-      return Result;
-   end "+";
+      return Selection.Components (Component) = Excluded;
+   end Is_Excluded;
+
+   function Is_Optional
+     (Selection : Selection_Type;
+      Component : Component_Package.Component_Kind_Type) return Boolean
+   is
+   begin
+      return Selection.Components (Component) = Optional;
+   end Is_Optional;
 
    function "="
      (Selection        : Selection_Type;
       Components_Array : Component_Package.Component_Boolean_Array_Type)
       return Boolean
    is
+      Valid : Boolean := True;
    begin
-      case Selection.Selection_Kind is
-         when Inclusive =>
-            for Kind in Component_Package.Component_Kind_Type loop
-               if Selection.Is_Selected (Kind) and then Components_Array (Kind) then
-                  return True;
+      for Kind in Component_Package.Component_Kind_Type loop
+         case Selection.Components (Kind) is
+            when Included =>
+               if not Components_Array (Kind) then
+                  Valid := False;
                end if;
-            end loop;
-
-            return False;
-
-         when Exclusive =>
-            for Kind in Component_Package.Component_Kind_Type loop
-               if not Selection.Is_Selected (Kind) and then Components_Array (Kind) then
-                  return False;
+            when Excluded =>
+               if Components_Array (Kind) then
+                  Valid := False;
                end if;
-            end loop;
-
-            return True;
-
-         when Exact =>
-            declare 
-               Valid: Boolean := True;
-            begin
-               for Kind in Component_Package.Component_Kind_Type loop
-                  if Selection.Is_Selected (Kind) and then not Components_Array (Kind) then
-                     Valid := False;
-                  end if;
-               end loop;
-               return Valid;
-            end;
-
-      end case;
+            when Optional =>
+               null;
+         end case;
+      end loop;
+      return Valid;
    end "=";
 
 end Internal.Generic_Selection;

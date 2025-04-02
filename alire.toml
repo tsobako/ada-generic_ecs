@@ -1,6 +1,6 @@
 name = "generic_ecs"
 description = "A generic ECS for Ada language inspired by Entt"
-version = "0.4.0-dev"
+version = "0.5.0-dev"
 
 authors = ["louis-etne"]
 maintainers = ["louis-etne@mail.com"]

@@ -27,7 +27,7 @@ package body Generic_ECS_Suite is
 
       Runner.Create
         (TC   => Test_Clear_Registry,
-         Name => "Clear the registery",
+         Name => "Clear the registry",
          Test => Generic_ECS_Tests.Test_Clear_Registry'Access);
       Result.Add_Test (Test_Clear_Registry'Access);
 

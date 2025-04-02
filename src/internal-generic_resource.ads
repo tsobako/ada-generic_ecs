@@ -5,6 +5,7 @@ package Internal.Generic_Resource with
 is
 
    type Resource_Interface_Type is interface;
-   type Resource_Interface_Class_Access_Type is access all Resource_Interface_Type'Class;
+   type Resource_Interface_Class_Access_Type is
+     access all Resource_Interface_Type'Class;
 
 end Internal.Generic_Resource;

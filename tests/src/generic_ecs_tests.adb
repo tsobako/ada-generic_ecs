@@ -39,7 +39,7 @@ package body Generic_ECS_Tests is
          Kind      => Components.Position_Kind,
          Component => ECS.Component_Interface_Class_Access_Type (Position));
 
-      -- Test components presence
+      --  Test components presence
       declare
          Set : constant ECS.Component_Boolean_Array_Type := Registry.Get_Set_Components (Entity);
       begin
@@ -47,7 +47,7 @@ package body Generic_ECS_Tests is
          AUnit.Assertions.Assert (not Set (Components.Rotation_Kind), "rotation is set");
       end;
 
-      -- Test to retrieve a component
+      --  Test to retrieve a component
       declare
          use type Components.Position.Position_Component_Access_Type;
 
@@ -61,7 +61,7 @@ package body Generic_ECS_Tests is
          AUnit.Assertions.Assert (New_Position.Z = 5.0, "New_Position.Z /= 5.0");
       end;
 
-      -- Test to update a component
+      --  Test to update a component
       Position.X := 7.0;
       declare
          New_Position : constant Components.Position.Position_Component_Access_Type :=
@@ -70,7 +70,7 @@ package body Generic_ECS_Tests is
          AUnit.Assertions.Assert (New_Position.X = 7.0, "New_Position.X /= 7.0");
       end;
 
-      -- Test to delete a component
+      --  Test to delete a component
       Registry.Unset (Entity, Components.Position_Kind);
       declare
          Set : constant ECS.Component.Component_Boolean_Array_Type := Registry.Get_Set_Components (Entity);
@@ -83,50 +83,40 @@ package body Generic_ECS_Tests is
    procedure Test_Selection (T : in out Test) is
    begin
 
-      -- Test basic actions
+      --  Test basic actions
       declare
          Selection : ECS.Selection.Selection_Type;
       begin
-         Selection.Select_Component (Components.Position_Kind);
-         AUnit.Assertions.Assert (Selection.Is_Selected (Components.Position_Kind), "position is not selected");
-         AUnit.Assertions.Assert (not Selection.Is_Selected (Components.Rotation_Kind), "rotation is selected");
+         Selection.Include_Component (Components.Position_Kind);
+         AUnit.Assertions.Assert (Selection.Is_Included (Components.Position_Kind), "position is not selected");
+         AUnit.Assertions.Assert (not Selection.Is_Included (Components.Rotation_Kind), "rotation is selected");
 
-         Selection.Unselect_Component (Components.Position_Kind);
-         AUnit.Assertions.Assert (not Selection.Is_Selected (Components.Position_Kind), "position is still selected");
+         Selection.Exclude_Component (Components.Position_Kind);
+         AUnit.Assertions.Assert (not Selection.Is_Included (Components.Position_Kind), "position is still selected");
       end;
 
-      -- Test initialization from operators
+      --  Test exclusive selection
       declare
          use ECS.Selection;
 
-         Selection : ECS.Selection.Selection_Type := +Components.Position_Kind;
+         Selection : ECS.Selection.Selection_Type := ECS.Selection.Select_None;
+         Match     : constant ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => False);
+         Not_Match : constant ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => True);
       begin
-         AUnit.Assertions.Assert (Selection.Is_Selected (Components.Position_Kind), "position is not selected");
-         Selection := Selection + Components.Rotation_Kind;
-         AUnit.Assertions.Assert (Selection.Is_Selected (Components.Rotation_Kind), "rotation is not selected");
-      end;
-
-      -- Test exclusive selection
-      declare
-         use ECS.Selection;
-
-         Selection : ECS.Selection.Selection_Type     := +Components.Position_Kind;
-         Match     : ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => False);
-         Not_Match : ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => True);
-      begin
-         Selection.Selection_Kind (ECS.Selection.Exclusive);
+         Selection.Include_Component (Components.Position_Kind);
          AUnit.Assertions.Assert (Selection = Match, "exclusive selection is not matching");
          AUnit.Assertions.Assert (Selection /= Not_Match, "exclusive selection is matching when it shouldn't");
       end;
 
-      -- Test inclusive selection
+      --  Test inclusive selection
       declare
          use ECS.Selection;
 
-         Selection : ECS.Selection.Selection_Type     := +Components.Position_Kind;
-         Match     : ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => True);
+         Selection : ECS.Selection.Selection_Type   := ECS.Selection.Select_Optional;
+         Match     : constant ECS.Component_Boolean_Array_Type := (Components.Position_Kind => True, Components.Rotation_Kind => True);
          Not_Match : ECS.Component_Boolean_Array_Type := (Components.Position_Kind => False, Components.Rotation_Kind => True);
       begin
+         Selection.Include_Component(Components.Position_Kind);
          AUnit.Assertions.Assert (Selection = Match, "inclusive selection is not matching");
          AUnit.Assertions.Assert (Selection /= Not_Match, "inclusive selection is matching when it shouldn't");
          Not_Match := (others => False);
@@ -155,20 +145,24 @@ package body Generic_ECS_Tests is
       Entity   : constant ECS.Entity_Type                                    := Registry.Create;
       Position : constant Components.Position.Position_Component_Access_Type := new Components.Position.Position_Component_Type;
       System   : System_Type                                                 := (Foo => 0);
+      Selection: ECS.Selection.Selection_Type;
    begin
       Registry.Set
         (Entity    => Entity,
          Kind      => Components.Position_Kind,
          Component => ECS.Component_Interface_Class_Access_Type (Position));
 
+      Selection.Include_Component(Components.Position_Kind);
       Registry.Each
-        (Components => +Components.Position_Kind,
+        (Components => Selection,
          System     => System);
 
       AUnit.Assertions.Assert (System.Foo = 5, "System.Foo has the wrong value after running the system");
 
+      Selection.Optional_Component(Components.Position_Kind);
+      Selection.Include_Component(Components.Rotation_Kind);
       Registry.Each
-        (Components => +Components.Rotation_Kind, -- The system shouldn't run as the entity doesn't implement the rotation
+        (Components => Selection, --  The system shouldn't run as the entity doesn't implement the rotation
          System     => System);
 
       AUnit.Assertions.Assert (System.Foo = 5, "System.Foo has the wrong value after running the system");
@@ -178,7 +172,7 @@ package body Generic_ECS_Tests is
 
    procedure Test_Add_Resource (T : in out Test) is
       Registry : ECS.Registry_Type        := ECS.Initialize;
-      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+      Level_Resource : constant Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
    begin
       Level_Resource.Value := 1;
       Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
@@ -188,7 +182,7 @@ package body Generic_ECS_Tests is
 
    procedure Test_Get_Resource (T : in out Test) is 
       Registry : ECS.Registry_Type        := ECS.Initialize;
-      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+      Level_Resource : constant Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
    begin
       Level_Resource.Value := 1;
       Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
@@ -205,8 +199,8 @@ package body Generic_ECS_Tests is
 
    procedure Test_Remove_Resource (T : in out Test)  is 
       Registry : ECS.Registry_Type        := ECS.Initialize;
-      Level_Resource: Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
-      Time_Resource: Resources.Time.Time_Resource_Access_Type := new Resources.Time.Time_Resource_Type;
+      Level_Resource : constant Resources.Level.Level_Resource_Access_Type := new Resources.Level.Level_Resource_Type;
+      Time_Resource : constant Resources.Time.Time_Resource_Access_Type := new Resources.Time.Time_Resource_Type;
    begin
       Level_Resource.Value := 1;
       Registry.Add_Resource(Resources.Level_Kind, ECS.Resource_Interface_Class_Access_Type(Level_Resource));
@@ -214,8 +208,8 @@ package body Generic_ECS_Tests is
 
 
       Time_Resource.Value := 100;
-      Registry.Add_Resource(Resources.Time_Kind, ECS.Resource_Interface_Class_Access_Type(Time_Resource));
-      Registry.Remove_Resource(Resources.Level_Kind);
+      Registry.Add_Resource (Resources.Time_Kind, ECS.Resource_Interface_Class_Access_Type(Time_Resource));
+      Registry.Remove_Resource (Resources.Level_Kind);
       AUnit.Assertions.Assert (not Registry.Has_Resource(Resources.Level_Kind), "registry does have resource");
       AUnit.Assertions.Assert (Registry.Has_Resource(Resources.Time_Kind), "registry does not have non-deleted resource");
    end Test_Remove_Resource;

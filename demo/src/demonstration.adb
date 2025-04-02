@@ -5,9 +5,9 @@ with Generic_ECS;
 procedure Demonstration is
    type Component_Kind_Type is (Position_Kind);
    type Resource_Kind_Type is (Time_Kind);
-   --  if you are not planning to use any resource, declare resource kind as empty range
-   --  type Resource_Kind_Type is range 1 .. 0;
-   --  But adding/updating/deleting any resource will cause Constraint_Error;
+   --   if you are not planning to use any resource, declare resource kind as empty range
+   --   type Resource_Kind_Type is range 1 .. 0;
+   --   But adding/updating/deleting any resource will cause Constraint_Error;
    package ECS is new Generic_ECS (Component_Kind_Type, Resource_Kind_Type);
 
    type Position_Type is new ECS.Component_Interface_Type with record
@@ -34,7 +34,7 @@ procedure Demonstration is
    Registry : ECS.Registry_Type := ECS.Initialize;
 begin
 
-   -- Add time resource
+   --  Add time resource
    declare
       Current_Time : constant Ada.Calendar.Time := Ada.Calendar.Clock;
       Time : constant Time_Access_Type := new Time_Type;
@@ -43,7 +43,7 @@ begin
       Registry.Add_Resource(Time_Kind, ECS.Resource_Interface_Class_Access_Type(Time));
    end;
 
-   -- Create 5 entities
+   --  Create 5 entities
    for Index in 1 .. 5 loop
       declare
          Entity   : constant ECS.Entity_Type      := Registry.Create;
@@ -51,14 +51,14 @@ begin
       begin
          Position.X := Float (Index);
 
-         -- Set the component only for odd indexes
+         --  Set the component only for odd indexes
          if Index mod 2 = 1 then
             Registry.Set (Entity, Position_Kind, ECS.Component_Interface_Class_Access_Type (Position));
          end if;
       end;
    end loop;
 
-   -- Print x for each entities implementing the Position component
+   --  Print x for each entities implementing the Position component
    declare
       Selection : ECS.Selection.Selection_Type;
    begin

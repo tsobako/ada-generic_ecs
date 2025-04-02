@@ -10,7 +10,7 @@ executables = ["test_generic_ecs"]
 
 [[depends-on]]
 aunit = "^24.0.0"
-generic_ecs = "^0.4.0"
+generic_ecs = "^0.5.0"
 
 [[pins]]
 generic_ecs = { path='..' }
